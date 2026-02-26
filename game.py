@@ -312,11 +312,27 @@ class Game:
                 
                 if "next_scene" in selected_choice:
                     self.current_scene_id = selected_choice["next_scene"]
+                    
                     # If the next scene is "start", it's a loop (farming)
                     if self.current_scene_id == "start":
                         type_text("\nYou take a moment to breathe. The world remains fractured, but your resolve hardens.", color=CYAN)
+                        # Reset all enemies in the chapter for farming
+                        for s in chapter.scenes.values():
+                            if s.enemy:
+                                s.enemy.hp = s.enemy.max_hp
+                                s.enemy.clear_effects()
                         input("\nPress Enter...")
                         continue # Restart chapter loop
+                    
+                    # Handle mid-chapter camp access
+                    if self.current_scene_id == "camp":
+                        res = self.play_camp()
+                        if res == "exit_to_menu":
+                            return "exit_to_menu"
+                        # After camp, return to the previous scene or a specific return point
+                        self.current_scene_id = selected_choice.get("return_scene", "start")
+                        continue
+                    
                     continue # Go to next scene
                 else:
                     break # Chapter end

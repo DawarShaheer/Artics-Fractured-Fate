@@ -97,6 +97,7 @@ def get_story_data():
             "The distortion here is immense. You can feel Darius's rage as a physical pressure.",
             choices=[
                 {"text": "Face the Time Phantom.", "next_scene": "phantom_fight"},
+                {"text": "Return to Ethereal Camp (Heal/Shop).", "next_scene": "camp", "return_scene": "rift_heart"},
                 {"text": "Take a moment to farm memories (Repeat).", "next_scene": "start"}
             ]
         ),
