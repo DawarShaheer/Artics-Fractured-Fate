@@ -16,16 +16,28 @@ A text-based RPG exploring themes of destiny, brotherhood, and the weight of cho
 - **📖 Narrative Depth**: 5 Chapters of branching story content with rich atmospheric descriptions and meaningful choices.
 - **💾 Save System**: Support for multiple player profiles with automatic persistence.
 
-## 🎮 How to Play
+## 🚀 How to Play
 
-Run the game using Python:
-```bash
-python3 main.py
-```
+### Prerequisites
+- **Python 3.x**: Ensure Python is installed on your system. [Download Python](https://www.python.org/downloads/)
 
-### Controls
+### Windows (Easy Launch)
+Simply double-click the **`run_game.bat`** file in the root folder. 
+*This script will automatically check for Python and launch the game for you.*
+
+### Linux / macOS
+1. Open your terminal in the project directory.
+2. Run the following command:
+   ```bash
+   python3 main.py
+   ```
+
+---
+
+## 🎮 Controls
 - **Numbers (1-9)**: Navigate menus and select combat actions.
-- **Enter**: Skip slow typing or proceed through narrative sections.
+- **Enter**: Skip slow typing animations or proceed through narrative sections.
+- **Space/Any Key**: Also skips typing animations on Windows.
 
 ---
 *Created with resolve by the Arctis Development Team.*
