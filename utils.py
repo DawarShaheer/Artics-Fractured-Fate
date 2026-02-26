@@ -16,7 +16,12 @@ BLUE = "\033[34m"
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-import select
+try:
+    import msvcrt
+    _WINDOWS = True
+except ImportError:
+    import select
+    _WINDOWS = False
 
 def type_text(text, delay=0.01, color=WHITE):
     """Prints text with a typing effect. Pressing Enter skips the animation."""
@@ -27,12 +32,17 @@ def type_text(text, delay=0.01, color=WHITE):
         sys.stdout.flush()
         
         if not skip and delay > 0:
-            # Check if Enter was pressed (non-blocking)
-            # This works on Unix-like systems (Linux/macOS)
-            if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                sys.stdin.readline() # Consume the newline
-                skip = True
+            if _WINDOWS:
+                if msvcrt.kbhit():
+                    # Check if the key pressed was Enter (13) or Space (32)
+                    key = msvcrt.getch()
+                    skip = True
             else:
+                if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
+                    sys.stdin.readline() # Consume the newline
+                    skip = True
+            
+            if not skip:
                 time.sleep(delay)
                 
     sys.stdout.write(RESET + "\n")
