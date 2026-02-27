@@ -23,6 +23,19 @@ MAGENTA = "\033[35m"
 WHITE = "\033[37m"
 BLUE = "\033[34m"
 
+def move_up(n=1):
+    """Moves the cursor up n lines."""
+    if n > 0:
+        sys.stdout.write(f"\033[{n}A")
+        sys.stdout.flush()
+
+def delete_lines(n=1):
+    """Clears n lines above the current cursor position."""
+    for _ in range(n):
+        sys.stdout.write("\033[F") # Move up one line
+        sys.stdout.write("\033[K") # Clear the line
+    sys.stdout.flush()
+
 def get_key():
     """Reads a single keypress without waiting for Enter."""
     if _WINDOWS:

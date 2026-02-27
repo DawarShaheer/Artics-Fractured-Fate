@@ -70,11 +70,14 @@ class Game:
         self.ending()
 
     def play_camp(self):
+        full_redraw = True
         while True:
-            clear_screen()
-            type_text(center_text("--- THE ETHEREAL CAMP ---"), color=CYAN)
-            type_text("The rift is quiet here. The air is filled with the soft hum of the Wheel, "
-                      "providing a temporary sanctuary between the fragments of existence.", color=WHITE)
+            if full_redraw:
+                clear_screen()
+                type_text(center_text("--- THE ETHEREAL CAMP ---"), color=CYAN)
+                type_text("The rift is quiet here. The air is filled with the soft hum of the Wheel, "
+                          "providing a temporary sanctuary between the fragments of existence.", color=WHITE)
+                full_redraw = False
             
             # Stats Display
             print(f"\n{BOLD}{self.player.name}{RESET} | LV: {self.player.level} | HP: {GREEN}{self.player.hp}/{self.player.max_hp}{RESET} | MP: {CYAN}{self.player.mp}/{self.player.max_mp}{RESET}")
@@ -84,23 +87,27 @@ class Game:
             choices = ["Rest (Restore HP/MP)", "Meditate (Brotherhood)", "Memory Gates (Farming)", "Ethereal Shop", "Alchemy Booth", "Status, Skills & Bag", "Save & Exit to Menu", "Break Camp & Proceed"]
             choice = get_choice(choices, "Camp Action: ")
             
+            # Choice outcome handling
+            outcome_msg = ""
             if choice == 1:
                 self.player.hp = self.player.max_hp
                 self.player.mp = self.player.max_mp
-                type_text("You drift into a dreamless sleep. Your vitalities are restored.", color=GREEN)
-                input("\nPress Enter...")
+                outcome_msg = f"{GREEN}You drift into a dreamless sleep. Your vitalities are restored.{RESET}"
             elif choice == 2:
                 self.player.brotherhood_score += 1
-                type_text("You sit in silence, mending the frayed threads of your shared past. Brotherhood increased.", color=YELLOW)
-                input("\nPress Enter...")
+                outcome_msg = f"{YELLOW}You sit in silence, mending the frayed threads of your shared past. Brotherhood increased.{RESET}"
             elif choice == 3:
                 self.enter_gate_system()
+                full_redraw = True # Return from complex sub-menu
             elif choice == 4:
                 self.play_shop()
+                full_redraw = True
             elif choice == 5:
                 self.play_alchemy()
+                full_redraw = True
             elif choice == 6:
                 self.view_status_and_skills()
+                full_redraw = True
             elif choice == 7:
                 save_game(self.player, self.current_chapter)
                 type_text("Progress saved. Returning to rift currents...", color=CYAN)
@@ -109,11 +116,26 @@ class Game:
                 type_text("You pack your resolve. The path ahead awaits.", color=CYAN)
                 input("\nPress Enter...")
                 break
+            
+            if not full_redraw:
+                # Surgical update: Clear stats line (3) + divider (1) + choice prompt result if any
+                # get_choice already clears itself.
+                # If there was an outcome message, show it briefly then clear.
+                if outcome_msg:
+                    print(f"\n{outcome_msg}")
+                    time.sleep(1.5)
+                    delete_lines(2) # Clear outcome msg
+                
+                delete_lines(4) # Clear stats and horizontal line to redraw fresh stats
 
     def play_shop(self):
+        full_redraw = True
         while True:
-            clear_screen()
-            type_text("--- ETHEREAL SHOP ---", color=YELLOW)
+            if full_redraw:
+                clear_screen()
+                type_text("--- ETHEREAL SHOP ---", color=YELLOW)
+                full_redraw = False
+            
             print(f"Your Gold: {YELLOW}{self.player.gold}G{RESET}\n")
             
             items = [
@@ -135,116 +157,149 @@ class Game:
             if choice == len(items): break
             
             item = items[choice]
+            outcome_msg = ""
             if self.player.gold >= item["price"]:
                 self.player.gold -= item["price"]
                 if item["type"] in ["heal", "mana"]:
-                    self.player.add_item(item["name"], item["type"], item["val"], item["desc"])
-                    type_text(f"Purchased {item['name']}!", color=GREEN)
-                else: # Equipment
-                    slot = item["type"]
-                    bonus_key = "atk_bonus" if slot == "weapon" else "def_bonus" if slot == "armor" else "spd_bonus"
-                    self.player.equipment[slot] = {"name": item["name"], bonus_key: item["val"]}
-                    type_text(f"Equipped {item['name']}! Your stats surged.", color=GREEN)
+                    self.player.add_to_inventory(item["name"], item["desc"])
+                else:
+                    self.player.equip(item["type"], item["name"], item["val"])
+                outcome_msg = f"{GREEN}Purchased {item['name']}!{RESET}"
             else:
-                type_text("Not enough gold.", color=RED)
-            input("\nPress Enter...")
+                outcome_msg = f"{RED}Insufficient Gold.{RESET}"
+            
+            if outcome_msg:
+                print(f"\n{outcome_msg}")
+                time.sleep(1)
+                delete_lines(2) # Clear outcome
+            
+            delete_lines(2) # Clear gold line and extra newline to redraw fresh gold
 
     def play_alchemy(self):
+        full_redraw = True
         while True:
-            clear_screen()
-            type_text("--- ALCHEMY BOOTH ---", color=MAGENTA)
+            if full_redraw:
+                clear_screen()
+                type_text("--- ALCHEMY BOOTH ---", color=MAGENTA)
+                full_redraw = False
+            
             print(f"Skill Stones: {MAGENTA}{self.player.skill_stones}{RESET}\n")
             
             options = ["Transmute (5 Stones) - Unlock New Skill", "Empower (3 Stones) - Level Up Skill", "Back"]
             choice = get_choice(options, "Action: ")
             
+            outcome_msg = ""
             if choice == 1: # Unlock
-                # Find the next locked skill from skill_data
                 potential_skills = []
                 learned_ids = [s.get("id") for s in self.player.skills]
-                for lv, sdata in self.player.skill_data.items():
-                    if sdata["id"] not in learned_ids:
-                        potential_skills.append(sdata)
+                for s in self.player.skill_data.values():
+                    if s["id"] not in learned_ids:
+                        potential_skills.append(s)
                 
                 if not potential_skills:
-                    type_text("You have mastered all currently known resonance.", color=CYAN)
+                    outcome_msg = f"{YELLOW}All known resonances have already been mastered.{RESET}"
                 elif self.player.skill_stones >= 5:
                     self.player.skill_stones -= 5
-                    new_skill = potential_skills[0] # Unlock the lowest level one
-                    self.player.skills.append(new_skill)
-                    type_text(f"The stone shatters into light... Learned {BOLD}{new_skill['name']}{RESET}!", color=GREEN)
+                    new_s = potential_skills[0]
+                    self.player.skills.append(new_s)
+                    outcome_msg = f"{GREEN}Transmutation successful! Mastered {new_s['name']}.{RESET}"
                 else:
-                    type_text("Requires 5 Skill Stones.", color=RED)
-            elif choice == 2: # Upgrade
+                    outcome_msg = f"{RED}Insufficient Skill Stones (5 required).{RESET}"
+            elif choice == 2: # Empower
                 if not self.player.skills:
-                    type_text("No skills to empower.", color=RED)
+                    outcome_msg = f"{RED}No skills available to empower.{RESET}"
                 elif self.player.skill_stones >= 3:
-                    s_list = [f"{s['name']} (Lv {s.get('level', 1)})" for s in self.player.skills] + ["Back"]
-                    s_choice = get_choice(s_list, "Empower which skill? ") - 1
+                    skill_list = [f"{s['name']} (Lv {s.get('level', 1)})" for s in self.player.skills] + ["Back"]
+                    s_choice = get_choice(skill_list, "Empower which skill?") - 1
+                    
                     if s_choice < len(self.player.skills):
                         self.player.skill_stones -= 3
-                        skill = self.player.skills[s_choice]
-                        success, msg = self.player.upgrade_skill(skill.get("id"))
-                        type_text(msg, color=GREEN)
+                        target = self.player.skills[s_choice]
+                        success, res_msg = self.player.upgrade_skill(target["id"])
+                        outcome_msg = f"{GREEN}{res_msg}{RESET}"
+                        # If a submenu was opened, we might need a full redraw if it printed stuff
+                        # but get_choice handles itself.
                 else:
-                    type_text("Requires 3 Skill Stones.", color=RED)
-            else:
+                    outcome_msg = f"{RED}Insufficient Skill Stones (3 required).{RESET}"
+            elif choice == 3:
                 break
-            input("\nPress Enter...")
+
+            if outcome_msg:
+                print(f"\n{outcome_msg}")
+                time.sleep(1.5)
+            delete_lines(2)
+            
+            delete_lines(2) # Clear stones line
 
     def enter_gate_system(self):
-        clear_screen()
-        type_text("--- THE MEMORY GATES ---", color=BLUE)
-        type_text("The rift here is organized into stable frequencies. "
-                  "Choose a rank to challenge. Be warned: exhaustion carries over.", color=WHITE)
-        
-        ranks = ["F (Lv 1-10)", "E (Lv 11-20)", "D (Lv 21-30)", "C (Lv 31-40)", "B (Lv 41-50)", "Back"]
-        rank_idx = get_choice(ranks, "Select Gate Rank: ") - 1
-        
-        if rank_idx == 5: return
-        
-        rank_letter = ["F", "E", "D", "C", "B"][rank_idx]
-        wave = 1
-        
+        full_redraw = True
         while True:
-            clear_screen()
-            print(f"{BLUE}--- Rank {rank_letter} Gate | Wave {wave} ---{RESET}")
+            if full_redraw:
+                clear_screen()
+                type_text("--- THE MEMORY GATES ---", color=BLUE)
+                type_text("The rift here is organized into stable frequencies. "
+                          "Choose a rank to challenge. Be warned: exhaustion carries over.", color=WHITE)
+                full_redraw = False
             
-            is_boss_wave = (wave % 5 == 0)
-            enemy = self.generate_gate_enemy(rank_letter, is_boss_wave, wave)
+            ranks = ["F (Lv 1-10)", "E (Lv 11-20)", "D (Lv 21-30)", "C (Lv 31-40)", "B (Lv 41-50)", "Back"]
+            rank_idx = get_choice(ranks, "Select Gate Rank: ") - 1
             
-            if is_boss_wave:
-                type_text(f"A massive presence looms... {RED}{enemy.name} (BOSS){RESET} emerges!", color=RED)
-            else:
-                type_text(f"A {enemy.name} materializes from the mist.")
+            if rank_idx == 5: return
+            
+            rank_letter = ["F", "E", "D", "C", "B"][rank_idx]
+            wave = 1
+            inner_redraw = True
+            
+            while True:
+                if inner_redraw:
+                    clear_screen()
+                    type_text(f"--- FRACTURE {rank_letter} [WAVE {wave}] ---", color=RED)
+                    inner_redraw = False
                 
-            combat = CombatManager(self.player, enemy)
-            success = combat.start_combat()
-            
-            if not success:
-                while True:
-                    res = self.handle_game_over()
-                    if res == "retry":
-                        self.player.hp = self.player.max_hp 
-                        self.player.mp = self.player.max_mp
-                        break # Re-try this wave
-                    elif res == "camp":
-                        camp_res = self.play_camp()
-                        if camp_res == "exit_to_menu":
+                print(f"Current Vitality: {GREEN}{self.player.hp}/{self.player.max_hp} HP{RESET} | {CYAN}{self.player.mp}/{self.player.max_mp} MP{RESET}\n")
+                
+                is_boss_wave = (wave % 5 == 0)
+                enemy = self.generate_gate_enemy(rank_letter, is_boss_wave, wave)
+                
+                if is_boss_wave:
+                    print(f"{RED}{BOLD}A massive presence looms... {enemy.name} (BOSS) emerges!{RESET}\n")
+                else:
+                    print(f"A {enemy.name} materializes from the mist.\n")
+                
+                # Dynamic options
+                options = [f"Challenge {enemy.name}", "Withdraw to Gate Entry"]
+                choice = get_choice(options, "Action: ")
+                
+                if choice == 2:
+                    full_redraw = True
+                    break
+                
+                cm = CombatManager(self.player, enemy)
+                success = cm.start_combat()
+                
+                if not success:
+                    # Handle Game Over within Gates
+                    while True:
+                        res = self.handle_game_over()
+                        if res == "retry":
+                            self.player.hp = self.player.max_hp 
+                            self.player.mp = self.player.max_mp
+                            inner_redraw = True
+                            break # Re-try this wave
+                        elif res == "camp":
+                            camp_res = self.play_camp()
+                            if camp_res == "exit_to_menu":
+                                return "exit_to_menu"
+                            inner_redraw = True
+                            continue # Back to game over menu after camp
+                        else:
                             return "exit_to_menu"
-                        continue # Back to game over menu after camp
-                    else:
-                        return "exit_to_menu"
-            
-            # Post-battle choices
-            print(f"\n{GREEN}Wave {wave} Cleared!{RESET}")
-            choices = ["Ventrue Deeper (Next Wave)", "Return to Camp"]
-            if get_choice(choices) == 2:
-                type_text("You withdraw from the Gate, breath ragged but spirit intact.", color=CYAN)
-                input("\nPress Enter...")
-                break
-            
-            wave += 1
+                    continue # Re-run the wave loop after retry break
+                
+                # Victory
+                self.handle_wave_victory(enemy)
+                wave += 1
+                inner_redraw = True
 
     def generate_gate_enemy(self, rank, is_boss, wave):
         # Base rank multipliers
