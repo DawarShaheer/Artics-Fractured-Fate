@@ -98,6 +98,12 @@ def slow_print(text, delay=0.5, color=WHITE):
     print(color + text + RESET)
     time.sleep(delay)
 
+def wait_any_key(prompt="\nPress any key to continue..."):
+    """Pauses and waits for any keypress."""
+    print(f"{prompt}", end="", flush=True)
+    get_key()
+    print() # Newline after press
+
 def get_choice(options, prompt="Choose an option: "):
     """Handles user input with a highlighted selector."""
     selected = 0

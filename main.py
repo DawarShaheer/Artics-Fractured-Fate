@@ -1,5 +1,5 @@
 from game import Game
-from utils import clear_screen, type_text, get_choice, center_text, CYAN, YELLOW, RED, BOLD, RESET
+from utils import clear_screen, type_text, get_choice, center_text, CYAN, YELLOW, RED, BOLD, RESET, wait_any_key
 from persistence import list_saves, delete_save
 
 def main_menu():
@@ -30,7 +30,7 @@ def main_menu():
             saves = list_saves()
             if not saves:
                 type_text("No threads of destiny found... (No save files)", color=RED)
-                input("\nPress Enter to return...")
+                wait_any_key()
                 continue
             
             print(f"\n{BOLD}Select your Thread:{RESET}")
@@ -44,7 +44,7 @@ def main_menu():
             saves = list_saves()
             if not saves:
                 type_text("Nothing to erase.", color=RED)
-                input("\nPress Enter to return...")
+                wait_any_key()
                 continue
             
             print(f"\n{RED}Select Save to DELETE:{RESET}")
@@ -56,7 +56,7 @@ def main_menu():
                 if confirm == 1:
                     delete_save(target)
                     type_text(f"Thread '{target}' has been severed.", color=YELLOW)
-                    input("\nPress Enter...")
+                    wait_any_key()
         else:
             type_text("The Wheel awaits your return, Traveler.", color=CYAN)
             break

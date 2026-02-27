@@ -1,5 +1,7 @@
 import random
-from utils import type_text, slow_print, get_choice, horizontal_line, clear_screen, center_text, WHITE, CYAN, YELLOW, RED, GREEN, MAGENTA, BLUE, BOLD, RESET
+import time
+
+from utils import type_text, slow_print, get_choice, horizontal_line, clear_screen, center_text, WHITE, CYAN, YELLOW, RED, GREEN, MAGENTA, BLUE, BOLD, RESET, delete_lines, wait_any_key
 from models import Player, Enemy
 from combat import CombatManager
 from story import get_story_data
@@ -27,7 +29,7 @@ class Game:
             return True
         else:
             type_text("No save file found.", color=RED)
-            input("\nPress Enter to return to menu...")
+            wait_any_key("\nPress any key to return to menu...")
             return False
 
     def run_game(self):
@@ -65,7 +67,7 @@ class Game:
                 if res == "exit_to_menu":
                     return
             else:
-                input("\nPress Enter to continue your journey...")
+                wait_any_key("\nPress any key to continue your journey...")
 
         self.ending()
 
@@ -114,7 +116,7 @@ class Game:
                 return "exit_to_menu"
             else:
                 type_text("You pack your resolve. The path ahead awaits.", color=CYAN)
-                input("\nPress Enter...")
+                wait_any_key()
                 break
             
             if not full_redraw:
@@ -148,7 +150,10 @@ class Game:
                 {"name": "Amber Vest", "price": 150, "type": "armor", "val": 5, "desc": "Arm: +5 DEF"},
                 {"name": "Obsidian Aegis", "price": 600, "type": "armor", "val": 20, "desc": "Arm: +20 DEF (High Tier)"},
                 {"name": "Phase Boots", "price": 180, "type": "boots", "val": 5, "desc": "Boot: +5 SPD"},
-                {"name": "Starlight Treads", "price": 500, "type": "boots", "val": 15, "desc": "Boot: +15 SPD (High Tier)"}
+                {"name": "Starlight Treads", "price": 500, "type": "boots", "val": 15, "desc": "Boot: +15 SPD (High Tier)"},
+                {"name": "Sol's Retribution", "price": 2500, "type": "weapon", "val": 60, "desc": "Weapon: +60 ATK (LEGENDARY)"},
+                {"name": "Aegis of Void", "price": 2000, "type": "armor", "val": 45, "desc": "Armor: +45 DEF (LEGENDARY)"},
+                {"name": "Chronos Steps", "price": 1500, "type": "boots", "val": 30, "desc": "Boots: +30 SPD (LEGENDARY)"}
             ]
             
             shop_list = [f"{i['name']} ({i['price']}G) - {i['desc']}" for i in items] + ["Back"]
@@ -271,6 +276,8 @@ class Game:
                 choice = get_choice(options, "Action: ")
                 
                 if choice == 2:
+                    type_text("You withdraw from the Gate, breath ragged but spirit intact.", color=CYAN)
+                    wait_any_key()
                     full_redraw = True
                     break
                 
@@ -322,11 +329,11 @@ class Game:
             return Enemy(name, 200*final_m, 25*final_m, 15*final_m, 20*final_m, 15, 500*m, 100*m, rank, is_boss=True)
         else:
             monster_pools = {
-                "F": ["Mist Stalker", "Grave-Walker", "Hollow Spirit", "Shard-Bug"],
-                "E": ["Refracted Hound", "Ash-Wraith", "Void-Skitter", "Bone-Scribe"],
-                "D": ["Chrono-Leech", "Obsidian Thrall", "Static-Remnant", "Glass-Gargoyle"],
-                "C": ["Rift-Slayer", "Temporal Stalker", "Soul-Eater", "Ether-Goliath"],
-                "B": ["Void-Reaper", "Cosmic Sentinel", "Fate-Eater", "Unraveling Terror"]
+                "F": ["Mist Stalker", "Grave-Walker", "Hollow Spirit", "Shard-Bug", "Dread-Rat", "Petrified Echo"],
+                "E": ["Refracted Hound", "Ash-Wraith", "Void-Skitter", "Bone-Scribe", "Cursed Remnant", "Static-Gazer"],
+                "D": ["Chrono-Leech", "Obsidian Thrall", "Static-Remnant", "Glass-Gargoyle", "Echo-Reaper", "Phase-Spider"],
+                "C": ["Rift-Slayer", "Temporal Stalker", "Soul-Eater", "Ether-Goliath", "Singularity-Worm", "Essence-Leech"],
+                "B": ["Void-Reaper", "Cosmic Sentinel", "Fate-Eater", "Unraveling Terror", "Reality-Splicer", "Aeon-Sorrow"]
             }
             names = monster_pools.get(rank, ["Rift Echo"])
             name = random.choice(names)
@@ -361,9 +368,8 @@ class Game:
                     if i["count"] > 0:
                         print(f"- {i['name']} x{i['count']}: {i['desc']}")
             
-            print(f"\n1. Back")
-            if get_choice(["Back"]) == 1:
-                break
+            wait_any_key("\nPress any key to go back.")
+            break
 
     def handle_game_over(self):
         clear_screen()
@@ -420,7 +426,7 @@ class Game:
             
             if scene.narrative_after:
                 type_text(f"\n{scene.narrative_after}")
-                input("\nPress Enter to proceed...")
+                wait_any_key("\nPress any key to proceed...")
 
             if scene.choices:
                 choice_texts = [c["text"] for c in scene.choices]
@@ -441,7 +447,7 @@ class Game:
                             if s.enemy:
                                 s.enemy.hp = s.enemy.max_hp
                                 s.enemy.clear_effects()
-                        input("\nPress Enter...")
+                        wait_any_key("\nPress any key...")
                         continue # Restart chapter loop
                     
                     # Handle mid-chapter camp access
