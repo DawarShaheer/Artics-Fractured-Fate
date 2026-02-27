@@ -130,7 +130,7 @@ class Player(Entity):
             5: {"id": "echo", "name": "Echo Step", "desc": "Blur your form, doubling SPD for 3 Rounds.", "cost": 10, "level": 1},
             10: {"id": "guard", "name": "Fate Guard", "desc": "Brace against destiny, doubling DEF for 2 Rounds.", "cost": 15, "level": 1},
             15: {"id": "light", "name": "Light Arc", "desc": "A horizontal strike of pure hope. High damage.", "cost": 45, "level": 1},
-            25: {"id": "time", "name": "Time Split", "desc": "Fracture the moment. Enemy skips turn.", "cost": 40, "level": 1},
+            25: {"id": "time", "name": "Time Split", "desc": "Fracture the moment. Enemy skips next 2 turns.", "cost": 40, "level": 1},
             40: {"id": "mercy", "name": "Final Mercy", "desc": "A strike that ends the conflict with peace.", "cost": 60, "level": 1}
         }
         self.mp = 20
