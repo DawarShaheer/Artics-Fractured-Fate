@@ -55,7 +55,9 @@ class Game:
             
             # Enter Ethereal Camp between chapters (if not at ending)
             if self.current_chapter in self.story:
-                self.play_camp()
+                res = self.play_camp()
+                if res == "exit_to_menu":
+                    return
             else:
                 input("\nPress Enter to continue your journey...")
 
@@ -110,10 +112,15 @@ class Game:
             
             items = [
                 {"name": "Mend-Extract", "price": 20, "type": "heal", "val": 50, "desc": "Restores 50 HP."},
+                {"name": "Mend-Greater", "price": 60, "type": "heal", "val": 150, "desc": "Restores 150 HP."},
                 {"name": "Ether-Drop", "price": 30, "type": "mana", "val": 20, "desc": "Restores 20 MP."},
-                {"name": "Silver Edge", "price": 200, "type": "weapon", "val": 10, "desc": "Weapon: +10 ATK"},
-                {"name": "Amber Vest", "price": 150, "type": "armor", "val": 5, "desc": "Armor: +5 DEF"},
-                {"name": "Phase Boots", "price": 180, "type": "boots", "val": 5, "desc": "Boots: +5 SPD"}
+                {"name": "Ether-Pure", "price": 100, "type": "mana", "val": 60, "desc": "Restores 60 MP."},
+                {"name": "Silver Edge", "price": 200, "type": "weapon", "val": 10, "desc": "Wep: +10 ATK"},
+                {"name": "Solar Flare", "price": 800, "type": "weapon", "val": 30, "desc": "Wep: +30 ATK (High Tier)"},
+                {"name": "Amber Vest", "price": 150, "type": "armor", "val": 5, "desc": "Arm: +5 DEF"},
+                {"name": "Obsidian Aegis", "price": 600, "type": "armor", "val": 20, "desc": "Arm: +20 DEF (High Tier)"},
+                {"name": "Phase Boots", "price": 180, "type": "boots", "val": 5, "desc": "Boot: +5 SPD"},
+                {"name": "Starlight Treads", "price": 500, "type": "boots", "val": 15, "desc": "Boot: +15 SPD (High Tier)"}
             ]
             
             shop_list = [f"{i['name']} ({i['price']}G) - {i['desc']}" for i in items] + ["Back"]
@@ -198,7 +205,7 @@ class Game:
             print(f"{BLUE}--- Rank {rank_letter} Gate | Wave {wave} ---{RESET}")
             
             is_boss_wave = (wave % 5 == 0)
-            enemy = self.generate_gate_enemy(rank_letter, is_boss_wave)
+            enemy = self.generate_gate_enemy(rank_letter, is_boss_wave, wave)
             
             if is_boss_wave:
                 type_text(f"A massive presence looms... {RED}{enemy.name} (BOSS){RESET} emerges!", color=RED)
@@ -225,17 +232,36 @@ class Game:
             
             wave += 1
 
-    def generate_gate_enemy(self, rank, is_boss):
-        # Stat multipliers based on rank
+    def generate_gate_enemy(self, rank, is_boss, wave):
+        # Base rank multipliers
         rank_mult = {"F": 1, "E": 2, "D": 4, "C": 7, "B": 12}
         m = rank_mult.get(rank, 1)
         
+        # Wave scaling: +10% stats per wave within the rank
+        w_m = 1 + (wave - 1) * 0.1
+        final_m = m * w_m
+        
         if is_boss:
-            return Enemy(f"Guardian of {rank}", 200*m, 25*m, 15*m, 20*m, 15, 500*m, 100*m, rank, is_boss=True)
+            boss_names = {
+                "F": "The Mournful Sentinel",
+                "E": "Echo of the First Burn",
+                "D": "Shard of the Fallen Star",
+                "C": "Calamity of the Rift",
+                "B": "Nihilus, the Unraveler"
+            }
+            name = boss_names.get(rank, f"Guardian of {rank}")
+            return Enemy(name, 200*final_m, 25*final_m, 15*final_m, 20*final_m, 15, 500*m, 100*m, rank, is_boss=True)
         else:
-            names = ["Mist Stalker", "Rift Shard", "Memory Eater", "Void Thrall"]
+            monster_pools = {
+                "F": ["Mist Stalker", "Grave-Walker", "Hollow Spirit", "Shard-Bug"],
+                "E": ["Refracted Hound", "Ash-Wraith", "Void-Skitter", "Bone-Scribe"],
+                "D": ["Chrono-Leech", "Obsidian Thrall", "Static-Remnant", "Glass-Gargoyle"],
+                "C": ["Rift-Slayer", "Temporal Stalker", "Soul-Eater", "Ether-Goliath"],
+                "B": ["Void-Reaper", "Cosmic Sentinel", "Fate-Eater", "Unraveling Terror"]
+            }
+            names = monster_pools.get(rank, ["Rift Echo"])
             name = random.choice(names)
-            return Enemy(name, 80*m, 12*m, 5*m, 12*m, 5, 100*m, 20*m, rank)
+            return Enemy(name, 80*final_m, 12*final_m, 5*final_m, 12*final_m, 5, 100*m, 20*m, rank)
 
     def check_inventory(self):
         clear_screen()
