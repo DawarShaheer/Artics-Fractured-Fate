@@ -216,11 +216,19 @@ class Game:
             success = combat.start_combat()
             
             if not success:
-                res = self.handle_game_over()
-                if res == "retry":
-                    continue # Re-try this wave
-                else:
-                    return # Exit Gate
+                while True:
+                    res = self.handle_game_over()
+                    if res == "retry":
+                        self.player.hp = self.player.max_hp 
+                        self.player.mp = self.player.max_mp
+                        break # Re-try this wave
+                    elif res == "camp":
+                        camp_res = self.play_camp()
+                        if camp_res == "exit_to_menu":
+                            return "exit_to_menu"
+                        continue # Back to game over menu after camp
+                    else:
+                        return "exit_to_menu"
             
             # Post-battle choices
             print(f"\n{GREEN}Wave {wave} Cleared!{RESET}")
@@ -312,10 +320,7 @@ class Game:
             self.player.mp = self.player.max_mp
             return "retry"
         elif choice == 2:
-            res = self.play_camp()
-            if res == "exit_to_menu":
-                return "exit_to_menu"
-            return "retry"
+            return "camp" # Signal to caller to go to camp
         else:
             save_game(self.player, self.current_chapter)
             return "exit_to_menu"
@@ -336,15 +341,21 @@ class Game:
                 combat = CombatManager(self.player, scene.enemy)
                 success = combat.start_combat()
                 if not success:
-                    res = self.handle_game_over()
-                    if res == "retry":
-                        self.current_scene_id = "start" # Reset chapter progress
-                        # Reset Enemy HP for retry
-                        scene.enemy.hp = scene.enemy.max_hp
-                        scene.enemy.clear_effects()
-                        return self.play_chapter(chapter)
-                    else:
-                        return "exit_to_menu"
+                    while True:
+                        res = self.handle_game_over()
+                        if res == "retry":
+                            self.current_scene_id = "start" # Reset chapter progress
+                            # Reset Enemy HP for retry
+                            scene.enemy.hp = scene.enemy.max_hp
+                            scene.enemy.clear_effects()
+                            break # Break the combat loop and restart scene while
+                        elif res == "camp":
+                            camp_res = self.play_camp()
+                            if camp_res == "exit_to_menu":
+                                return "exit_to_menu"
+                            continue # Back to game over menu after camp
+                        else:
+                            return "exit_to_menu"
             
             if scene.narrative_after:
                 type_text(f"\n{scene.narrative_after}")

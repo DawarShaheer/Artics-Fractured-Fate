@@ -56,4 +56,7 @@ def main_menu():
             break
 
 if __name__ == "__main__":
-    main_menu()
+    try:
+        main_menu()
+    except KeyboardInterrupt:
+        print(f"\n{CYAN}The Wheel awaits your return, Traveler.{RESET}")
