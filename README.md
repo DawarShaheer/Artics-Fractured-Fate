@@ -8,7 +8,11 @@ A text-based RPG exploring themes of destiny, brotherhood, and the weight of cho
 - **The Ethereal Camp**: A central hub between chapters where you can:
     - **🏪 Ethereal Shop**: Purchase permanent stat-boosting equipment (Weapon, Armor, Boots) and consumables using gold dropped by monsters.
     - **🧪 Alchemy Booth**: Use rare Skill Stones to unlock powerful new resonance skills or empower existing ones.
-    - **⛩️ Memory Gates**: Challenge wave-based ranked gates (Rank F to Rank B) for farming EXP and Gold. Face bosses to earn Skill Stones.
+    - **⛩️ Memory Gates**: Challenge wave-based ranked gates (Rank F to Rank B) with dynamic wave-scaling difficulty.
+    - **📊 Status & resonance**: Review detailed attributes, equipment stats, and leveled skill descriptions.
+- **Strategic Combat**: 
+    - **☸️ Wheel of Fate**: Turn-based combat with dynamic buffs (Power, Guard, Time Split, Chaos Force).
+    - **💨 Dodge Mechanic**: Speed-based evasion system that allows Kael to nimbly avoid enemy strikes.
 - **Progression Systems**:
     - **📈 Stat-based Growth**: Levels 1-50 with professional RPG stat scaling.
     - **🤝 Brotherhood System**: Your narrative choices influence Kael's relationship with Darius, leading to multiple branching endings.
