@@ -13,6 +13,9 @@ def main_menu():
         choice = get_choice(choices, "Main Menu Choice: ")
         
         if choice == 1:
+            conf = get_choice(["Yes, Begin Journey", "Back"], "Start a new adventure?")
+            if conf == 2: continue
+
             name = input("\nEnter your name: ").strip()
             if not name: name = "Kael"
             
@@ -35,6 +38,9 @@ def main_menu():
             if s_choice <= len(saves):
                 game.load_existing_game(saves[s_choice-1])
         elif choice == 3:
+            conf = get_choice(["Yes, Erase Destiny", "Back"], "Enter the deletion menu? This is irreversible.")
+            if conf == 2: continue
+
             saves = list_saves()
             if not saves:
                 type_text("Nothing to erase.", color=RED)
