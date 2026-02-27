@@ -90,4 +90,22 @@ def load_game(player_class, name):
             if player.level >= lv:
                 player.skills.append(skinf)
     
+    # RE-SYNC skills with current code data to ensure descriptions/costs are up to date
+    # while preserving the learned 'level' and cost reduction scaling.
+    ref_data = {sk["id"]: sk for sk in player.skill_data.values()}
+    for skill in player.skills:
+        s_id = skill.get("id")
+        if s_id in ref_data:
+            ref = ref_data[s_id]
+            skill["name"] = ref["name"]
+            skill["desc"] = ref["desc"]
+            
+            # Recalculate cost based on base and level to apply new balancing (e.g., Light Arc 45)
+            # while keeping the 10% reduction per level.
+            lv = skill.get("level", 1)
+            current_cost = ref["cost"]
+            for _ in range(lv - 1):
+                current_cost = max(5, int(current_cost * 0.9))
+            skill["cost"] = current_cost
+    
     return player, data["chapter"]
