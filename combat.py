@@ -2,6 +2,7 @@ from utils import type_text, get_choice, horizontal_line, RED, GREEN, YELLOW, CY
 from wheel import Wheel
 from models import Effect
 import time
+import random
 
 class CombatManager:
     def __init__(self, player, enemy):
