@@ -37,7 +37,7 @@ class Wheel:
             player.heal(80)
             player.mp = min(player.max_mp, player.mp + 40)
         elif outcome['id'] == "chaos":
-            player.add_effect(Effect("Chaos Force", 2, atk_mod=40, color=MAGENTA))
+            player.add_effect(Effect("Chaos Force", 5, atk_mod=40, color=MAGENTA))
             player.hp -= 30
             if player.hp < 1: player.hp = 1
         elif outcome['id'] == "reversal":

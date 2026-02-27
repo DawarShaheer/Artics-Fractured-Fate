@@ -75,7 +75,7 @@ class Game:
             print(f"EXP: {YELLOW}{self.player.exp}/{self.player.exp_to_next}{RESET} | GOLD: {YELLOW}{self.player.gold}G{RESET} | STONES: {MAGENTA}{self.player.skill_stones}{RESET}")
             horizontal_line()
             
-            choices = ["Rest (Restore HP/MP)", "Meditate (Brotherhood)", "Memory Gates (Farming)", "Ethereal Shop", "Alchemy Booth", "Check Bag", "Save & Exit to Menu", "Break Camp & Proceed"]
+            choices = ["Rest (Restore HP/MP)", "Meditate (Brotherhood)", "Memory Gates (Farming)", "Ethereal Shop", "Alchemy Booth", "Status, Skills & Bag", "Save & Exit to Menu", "Break Camp & Proceed"]
             choice = get_choice(choices, "Camp Action: ")
             
             if choice == 1:
@@ -88,13 +88,13 @@ class Game:
                 type_text("You sit in silence, mending the frayed threads of your shared past. Brotherhood increased.", color=YELLOW)
                 input("\nPress Enter...")
             elif choice == 3:
-                self.enter_gate_system() # Renamed from training_session
+                self.enter_gate_system()
             elif choice == 4:
                 self.play_shop()
             elif choice == 5:
                 self.play_alchemy()
             elif choice == 6:
-                self.check_inventory()
+                self.view_status_and_skills()
             elif choice == 7:
                 save_game(self.player, self.current_chapter)
                 type_text("Progress saved. Returning to rift currents...", color=CYAN)
@@ -263,16 +263,38 @@ class Game:
             name = random.choice(names)
             return Enemy(name, 80*final_m, 12*final_m, 5*final_m, 12*final_m, 5, 100*m, 20*m, rank)
 
-    def check_inventory(self):
-        clear_screen()
-        type_text("--- YOUR SATCHEL ---", color=YELLOW)
-        if not self.player.inventory:
-            type_text("Empty.", color=WHITE)
-        else:
-            for i in self.player.inventory:
-                if i["count"] > 0:
-                    print(f"- {i['name']} x{i['count']}: {i['desc']}")
-        input("\nClose bag...")
+    def view_status_and_skills(self):
+        while True:
+            clear_screen()
+            type_text(center_text(f"--- {BOLD}{self.player.name}'S RESONANCE ---"), color=YELLOW)
+            print(f"\n{BOLD}Attributes:{RESET}")
+            print(f"LV: {self.player.level} | HP: {GREEN}{self.player.hp}/{self.player.max_hp}{RESET} | MP: {CYAN}{self.player.mp}/{self.player.max_mp}{RESET} | LUCK: {self.player.luck}")
+            print(f"ATK: {RED}{self.player.atk}{RESET} | DEF: {BLUE}{self.player.def_stat}{RESET} | SPD: {CYAN}{self.player.spd}{RESET}")
+            
+            print(f"\n{BOLD}Equipment:{RESET}")
+            for slot, item in self.player.equipment.items():
+                name = item['name'] if item else "None"
+                print(f"{slot.capitalize()}: {name}")
+
+            print(f"\n{BOLD}Learned Skills:{RESET}")
+            if not self.player.skills:
+                print("None.")
+            else:
+                for s in self.player.skills:
+                    lv = s.get('level', 1)
+                    print(f"- {MAGENTA}{s['name']}{RESET} (Lv {lv}): {s['desc']} [{s['cost']} MP]")
+
+            print(f"\n{BOLD}Satchel Inventory:{RESET}")
+            if not self.player.inventory:
+                print("Empty.")
+            else:
+                for i in self.player.inventory:
+                    if i["count"] > 0:
+                        print(f"- {i['name']} x{i['count']}: {i['desc']}")
+            
+            print(f"\n1. Back")
+            if get_choice(["Back"]) == 1:
+                break
 
     def handle_game_over(self):
         clear_screen()

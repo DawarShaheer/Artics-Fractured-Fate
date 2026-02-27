@@ -66,7 +66,10 @@ class CombatManager:
         p_status = self.player.get_status_str()
         e_status = self.enemy.get_status_str()
         
-        print(f"{BOLD}{self.player.name}{RESET} [HP: {GREEN}{self.player.hp}/{self.player.max_hp}{RESET}] [MP: {CYAN}{self.player.mp}/{self.player.max_mp}{RESET}] {p_status}")
+        # Calculate Dodge Chance
+        dodge_chance = min(75, max(5, int((self.player.spd / self.enemy.spd) * 20)))
+        
+        print(f"{BOLD}{self.player.name}{RESET} [HP: {GREEN}{self.player.hp}/{self.player.max_hp}{RESET}] [MP: {CYAN}{self.player.mp}/{self.player.max_mp}{RESET}] [Dodge: {YELLOW}{dodge_chance}%{RESET}] {p_status}")
         print(f"{BOLD}{self.enemy.name}{RESET} [HP: {RED}{self.enemy.hp}/{self.enemy.max_hp}{RESET}] {e_status}")
         
         choices = ["Attack", "Spin the Wheel", "Use Skill", "Items", "Defend"]
@@ -131,7 +134,7 @@ class CombatManager:
     def handle_skill_effect(self, skill):
         name = skill['name']
         if name == "Echo Step":
-            self.player.add_effect(Effect("Echo Step", 3, spd_mod=self.player.base_spd, color=CYAN))
+            self.player.add_effect(Effect("Echo Step", 4, spd_mod=self.player.base_spd, color=CYAN))
         elif name == "Fate Guard":
             self.player.add_effect(Effect("Fate Guard", 3, def_mod=self.player.base_def, color=BLUE))
         elif name == "Light Arc":
@@ -147,6 +150,12 @@ class CombatManager:
         type_text(f"\n{self.enemy.name}'s turn...")
         time.sleep(0.5)
         
+        # Dodge logic
+        dodge_chance = min(75, max(5, int((self.player.spd / self.enemy.spd) * 20)))
+        if random.randint(1, 100) <= dodge_chance:
+            type_text(f"{CYAN}{BOLD}DODGED!{RESET} You nimbly avoid {self.enemy.name}'s attack!", color=CYAN)
+            return
+
         # Enemy Attack logic
         dmg_taken = self.player.take_damage(self.enemy.atk)
         type_text(f"{self.enemy.name} attacks for {RED}{dmg_taken}{RESET} damage!")
