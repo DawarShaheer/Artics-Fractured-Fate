@@ -41,7 +41,13 @@ class Game:
             if self.player.level < min_level:
                 type_text(f"{YELLOW}WARNING: This chapter is recommended for Level {min_level}+. You are Level {self.player.level}.{RESET}")
                 type_text("The distortions here may be too great for your current resolve.", color=YELLOW)
-                input("\nPress Enter to proceed anyway...")
+                
+                warn_opt = ["Proceed anyway", "Return to Ethereal Camp (Train/Shop)"]
+                if get_choice(warn_opt, "Resolution: ") == 2:
+                    res = self.play_camp()
+                    if res == "exit_to_menu":
+                        return
+                    continue
 
             result = self.play_chapter(chapter)
             if result == "exit_to_menu":
